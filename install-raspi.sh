@@ -5,7 +5,7 @@ set -e
 
 # Make sure script is run as root.
 if [ "$(id -u)" != "0" ]; then
-  echo "Must be run as root with sudo! Try: sudo ./install.sh"
+  echo "Must be run as root with sudo! Try: sudo ./install-raspi.sh"
   exit 1
 fi
 
@@ -16,13 +16,6 @@ if ! grep -q "^initramfs " /boot/config.txt; then
   echo Adding \"initramfs init.gz\" to /boot/config.txt
   echo initramfs init.gz >> /boot/config.txt
 fi
-
-if ! grep -q "^overlay" /etc/initramfs-tools/modules; then
-  echo Adding \"overlay\" to /etc/initramfs-tools/modules
-  echo overlay >> /etc/initramfs-tools/modules
-fi
-
-
 
 if dpkg --get-selections | grep -q "^dphys-swapfle\s*install$" >/dev/null; then
     echo Disabling swap, we dont want swap files in a read-only root filesystem...
@@ -35,18 +28,22 @@ else
 fi
 
 echo Setting up maintenance scripts in /root...
-cp reboot-to-readonly-mode.sh /root/reboot-to-readonly-mode.sh
-chmod +x /root/reboot-to-readonly-mode.sh
-
-cp reboot-to-writable-mode.sh /root/reboot-to-writable-mode.sh
-chmod +x /root/reboot-to-writable-mode.sh
+cp root/* /root/
+chmod +x /root/reboot-ro
+chmod +x /root/reboot-rw
+chmod +x /root/mount-ro
+chmod +x /root/mount-rw
 
 echo Setting up initramfs-tools scripts...
 cp etc/initramfs-tools/scripts/init-bottom/root-ro /etc/initramfs-tools/scripts/init-bottom/root-ro
-chmod +x /etc/initramfs-tools/scripts/init-bottom/root-ro
-
 cp etc/initramfs-tools/hooks/root-ro /etc/initramfs-tools/hooks/root-ro
+chmod +x /etc/initramfs-tools/scripts/init-bottom/root-ro
 chmod +x /etc/initramfs-tools/hooks/root-ro
+
+if ! grep -q "^overlay" /etc/initramfs-tools/modules; then
+  echo Adding \"overlay\" to /etc/initramfs-tools/modules
+  echo overlay >> /etc/initramfs-tools/modules
+fi
 
 echo Updating initramfs...
 update-initramfs -u
@@ -65,4 +62,4 @@ fi
 
 # Restarting without warning seems a bit harsh, so we'll just inform that it's necessary
 # reboot
-echo Please restart your RPI now to boot into read-only mode
+echo Please restart your Rasperry Pi now to boot into read-only mode

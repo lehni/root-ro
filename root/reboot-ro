@@ -1,0 +1,11 @@
+#/bin/sh
+if [ -f /disable-root-ro ]; then
+  rm /disable-root-ro
+  systemctl stop systemd-random-seed.service
+  if [ -f /var/lib/systemd/random-seed ]; then
+    rm -f /var/lib/systemd/random-seed
+  fi
+  reboot
+else
+  echo The root filesystem is already in readonly mode.
+fi

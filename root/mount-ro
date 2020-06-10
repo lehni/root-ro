@@ -1,0 +1,13 @@
+#/bin/sh
+if [ ! -f /disable-root-ro ]; then
+  if ischroot; then
+    echo You are still in writable chroot, run \`exit\` first.
+  else
+    umount /mnt/root-ro/run
+    umount /mnt/root-ro/proc
+    mount -o remount,ro /mnt/root-ro
+  fi
+else
+  echo The system was booted in writable mode and needs a reboot to enter readyonly mode.
+  echo Use \`sudo /root/reboot-ro\` instead.
+fi

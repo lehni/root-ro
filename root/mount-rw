@@ -1,0 +1,17 @@
+#/bin/sh
+if [ ! -f /disable-root-ro ]; then
+  if ischroot; then
+    echo You are already in writable chroot.
+  else
+    mount -o remount,rw /mnt/root-ro
+    # Enable DNS in chroot because resolvconf service needs to read /run/resolvconf/resolv.conf
+    mount -o bind /run /mnt/root-ro/run
+    # Make ps & co work in chroot
+    mount -t proc /proc /mnt/root-ro/proc
+    # chroot into /mnt/root-ro and start a shell with as user with UID 1000,
+    # which is mostly the disred user (e.g. pi on the Raspbery Pi).
+    chroot /mnt/root-ro sudo -i -u \#1000
+  fi
+else
+  echo The system was already booted in writable mode, no need for this script.
+fi

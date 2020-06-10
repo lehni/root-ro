@@ -1,0 +1,8 @@
+#/bin/sh
+if [ ! -f /disable-root-ro ]; then
+  mount -o remount,rw /mnt/root-ro
+  touch /mnt/root-ro/disable-root-ro
+  reboot
+else
+  echo The root filesystem is already in writable mode.
+fi
